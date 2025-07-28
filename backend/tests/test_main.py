@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 import sys
 import os
 
-# Set a fake API key before importing main to avoid Groq client initialization error
+# Set fake API key to avoid Groq client initialization error
 os.environ["GROQ_API_KEY"] = "fake_api_key_for_testing"
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -25,12 +25,10 @@ def test_app_startup():
 
 def test_endpoints_exist():
     """Test that required endpoints are available"""
-    # Check upload endpoint exists (even if it fails without proper data)
+    # Upload endpoint should exist
     response = client.post("/uploadfile/")
-    # Should return 422 (validation error) not 404 (not found)
     assert response.status_code == 422
     
-    # Check chat endpoint exists (even if it fails without proper data)
+    # Chat endpoint should exist  
     response = client.post("/chat/")
-    # Should return 422 (validation error) not 404 (not found)  
     assert response.status_code == 422

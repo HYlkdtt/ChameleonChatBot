@@ -13,10 +13,10 @@ app = FastAPI()
 # CORS middleware to allow frontend to communicate with backend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods
-    allow_headers=["*"],  # Allows all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 client = groq.Client(api_key=os.environ.get("GROQ_API_KEY"))
@@ -36,12 +36,8 @@ async def create_upload_file(file: UploadFile = File(...)):
     contents = await file.read()
     try:
         chat_history_data = json.loads(contents)
-        # Simple style analysis (can be improved)
-        # For now, let's just find the first message from a person and use it.
-        # A more complex implementation would analyze multiple messages.
+        # Extract style profile from first message
         if chat_history_data and len(chat_history_data) > 0:
-             # This is a placeholder for selecting a person and analyzing their style.
-             # For now, we'll just take the text of the first message as a "style".
             first_message = chat_history_data[0].get("text", "")
             style_profile = f"Respond in the style of someone who would say: '{first_message}'"
 
