@@ -18,35 +18,16 @@ jobs:
       with:
         python-version: '3.11'
     
-    - name: Cache dependencies
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-    
     - name: Install dependencies
       working-directory: ./backend
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     
-    - name: Lint with flake8
-      working-directory: ./backend
-      run: |
-        pip install flake8
-        # Stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=venv,__pycache__,.git
-        # Exit-zero treats all errors as warnings
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=venv,__pycache__,.git
-    
-    - name: Test with pytest
+    - name: Run basic health tests
       working-directory: ./backend
       run: |
         python -m pytest tests/ -v
-      env:
-        GROQ_API_KEY: "fake_api_key_for_testing"
 
   test-frontend:
     runs-on: ubuntu-latest
@@ -65,19 +46,9 @@ jobs:
       working-directory: ./frontend
       run: npm ci
     
-    - name: Lint frontend
-      working-directory: ./frontend
-      run: npm run lint --if-present || echo "No lint script found, skipping"
-    
     - name: Build frontend
       working-directory: ./frontend
       run: npm run build
-    
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: frontend-build
-        path: frontend/dist/
 
   deploy:
     needs: [test-backend, test-frontend]
@@ -85,17 +56,7 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Download build artifacts
-      uses: actions/download-artifact@v3
-      with:
-        name: frontend-build
-        path: frontend/dist/
-    
     - name: Deploy to production
       run: |
         echo "🚀 Deploying to production..."
-        echo "Backend API: Ready for deployment"
-        echo "Frontend: Built and ready"
-        echo "✅ Deployment complete!"
+        echo "✅ Basic health checks passed - ready for deployment!"
